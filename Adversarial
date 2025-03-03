@@ -1,0 +1,106 @@
+import math
+
+# Utility function to evaluate the score of the game
+def evaluate(board):
+    # Check rows, columns, and diagonals for a winner
+    for row in range(3):
+        if board[row][0] == board[row][1] == board[row][2]:
+            if board[row][0] == 'X':
+                return 10
+            elif board[row][0] == 'O':
+                return -10
+    for col in range(3):
+        if board[0][col] == board[1][col] == board[2][col]:
+            if board[0][col] == 'X':
+                return 10
+            elif board[0][col] == 'O':
+                return -10
+    if board[0][0] == board[1][1] == board[2][2]:
+        if board[0][0] == 'X':
+            return 10
+        elif board[0][0] == 'O':
+            return -10
+    if board[0][2] == board[1][1] == board[2][0]:
+        if board[0][2] == 'X':
+            return 10
+        elif board[0][2] == 'O':
+            return -10
+    return 0  # No winner
+
+# Check if the game has ended (either win or draw)
+def is_game_over(board):
+    return evaluate(board) != 0 or all(board[row][col] != ' ' for row in range(3) for col in range(3))
+
+# Minimax function
+def minimax(board, depth, is_maximizing_player):
+    score = evaluate(board)
+    
+    # If the Maximizing player has won, return score
+    if score == 10:
+        return score - depth
+    
+    # If the Minimizing player has won, return score
+    if score == -10:
+        return score + depth
+    
+    # If the game is a draw (board is full)
+    if is_game_over(board):
+        return 0
+    
+    if is_maximizing_player:
+        best = -math.inf
+        # Try every possible move and choose the best one
+        for i in range(3):
+            for j in range(3):
+                if board[i][j] == ' ':
+                    board[i][j] = 'X'
+                    best = max(best, minimax(board, depth + 1, False))
+                    board[i][j] = ' '  # Undo the move
+        return best
+    else:
+        best = math.inf
+        # Try every possible move and choose the worst one
+        for i in range(3):
+            for j in range(3):
+                if board[i][j] == ' ':
+                    board[i][j] = 'O'
+                    best = min(best, minimax(board, depth + 1, True))
+                    board[i][j] = ' '  # Undo the move
+        return best
+
+# Function to find the best move for the Maximizing player (X)
+def find_best_move(board):
+    best_val = -math.inf
+    best_move = (-1, -1)
+    
+    # Try every possible move for 'X' and pick the best one
+    for i in range(3):
+        for j in range(3):
+            if board[i][j] == ' ':
+                board[i][j] = 'X'
+                move_val = minimax(board, 0, False)
+                board[i][j] = ' '  # Undo the move
+                if move_val > best_val:
+                    best_move = (i, j)
+                    best_val = move_val
+    
+    return best_move
+
+# Display the board
+def print_board(board):
+    for row in board:
+        print("|".join(row))
+        print("-" * 5)
+
+# Example of usage
+
+# Initial board
+board = [
+    ['X', 'O', 'X'],
+    ['O', 'X', ' '],
+    [' ', ' ', 'O']
+]
+
+# Find and print the best move for 'X'
+best_move = find_best_move(board)
+print(f"The best move for 'X' is: {best_move}")
